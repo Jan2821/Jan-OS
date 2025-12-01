@@ -1,13 +1,20 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { AutopsyReport, TrafficViolation } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Remove top-level initialization to prevent runtime crash if env var is missing at load time
+// const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); 
 
 export const generateAutopsySummary = async (report: AutopsyReport): Promise<string> => {
-  if (!process.env.API_KEY) return "API Key fehlt. Bericht kann nicht generiert werden.";
+  // Check inside the function
+  if (!process.env.API_KEY) {
+    console.error("API Key is missing");
+    return "API Key fehlt. Bitte in Vercel Environment Variables konfigurieren.";
+  }
 
   try {
+    // Initialize here
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
     const prompt = `
       Verfasse einen formalen, gerichtsmedizinischen Zusammenfassungsbericht (auf Deutsch) basierend auf folgenden Daten:
       Name des Verstorbenen: ${report.deceasedName}
@@ -29,14 +36,20 @@ export const generateAutopsySummary = async (report: AutopsyReport): Promise<str
     return response.text || "Keine Zusammenfassung generiert.";
   } catch (error) {
     console.error("Error generating autopsy summary:", error);
-    return "Fehler bei der Generierung des Berichts.";
+    return "Fehler bei der Generierung des Berichts. Bitte API Key prüfen.";
   }
 };
 
 export const generateBlitzerImage = async (violation: TrafficViolation): Promise<string | undefined> => {
-  if (!process.env.API_KEY) return undefined;
+  if (!process.env.API_KEY) {
+     console.error("API Key is missing for image generation");
+     return undefined;
+  }
 
   try {
+    // Initialize here
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
     const prompt = `
       Erstelle ein realistisches Schwarz-Weiß-Foto einer Verkehrsüberwachungskamera (Blitzer).
       Das Bild zeigt einen ${violation.vehicleModel} von vorne.
@@ -44,6 +57,7 @@ export const generateBlitzerImage = async (violation: TrafficViolation): Promise
       Das Bild sollte authentisch wirken: leichtes Rauschen, typischer Winkel einer Radarkamera, hoher Kontrast.
     `;
 
+    // Ensure we catch specific API errors for images
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
@@ -51,9 +65,9 @@ export const generateBlitzerImage = async (violation: TrafficViolation): Promise
           { text: prompt }
         ]
       },
+      // Note: responseMimeType is not supported for this model, do not add it.
     });
 
-    // Handle both inline data and image result formats if they vary
     for (const part of response.candidates?.[0]?.content?.parts || []) {
       if (part.inlineData) {
         return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
@@ -62,7 +76,6 @@ export const generateBlitzerImage = async (violation: TrafficViolation): Promise
     return undefined;
   } catch (error) {
     console.error("Error generating blitzer image:", error);
-    // Return undefined instead of throwing to prevent app crash
     return undefined;
   }
 };
