@@ -51,10 +51,6 @@ export const generateBlitzerImage = async (violation: TrafficViolation): Promise
           { text: prompt }
         ]
       },
-      config: {
-        // Adding config specifically helps avoid some server-side 500 errors by being explicit
-        responseMimeType: 'application/json' 
-      }
     });
 
     // Handle both inline data and image result formats if they vary
