@@ -1,0 +1,8 @@
+{
+  "name": "Polizei Wache OS",
+  "description": "Ein modernes, webbasiertes Polizeiverwaltungssystem mit Retro-Ästhetik. Enthält Aktenverwaltung, Fax-Simulation und Obduktionsberichte mit Druckfunktion.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
