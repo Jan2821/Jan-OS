@@ -95,8 +95,19 @@
         print-color-adjust: exact;
         -webkit-print-color-adjust: exact;
       }
+      
+      /* Loader for Vercel start */
+      #loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-family: monospace;
+        color: #00ff00;
+        z-index: -1;
+      }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -112,6 +123,7 @@
 </script>
 </head>
   <body>
+    <div id="loader">SYSTEM BOOTING...</div>
     <div id="root"></div>
     <div id="print-portal"></div>
     <!-- Entry point for Vite -->
